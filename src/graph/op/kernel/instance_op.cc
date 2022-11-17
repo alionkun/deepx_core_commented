@@ -26,7 +26,7 @@ class InstanceOp : public OpImpl {
   void InitForward() override {
     switch (node_->tensor_type()) {
       case TENSOR_TYPE_TSR: {
-        auto& tsr = hidden_->mutable_inst()->get<tsr_t>(node_->name());
+        auto& tsr = hidden_->mutable_inst()->get<tsr_t>(node_->name()); // 特征存储在 context.hidden_.inst_ 中，下一行的作用是把特征放到 context.ptr_ 中
         InitPtrTSR(node_, &tsr);
       } break;
       case TENSOR_TYPE_CSR: {

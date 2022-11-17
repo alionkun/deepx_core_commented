@@ -15,7 +15,7 @@ namespace deepx_core {
 /************************************************************************/
 /* CSRMatrix */
 /************************************************************************/
-template <typename T, typename I>
+template <typename T, typename I> // T 是 value 的类型， I 是索引的类型
 class CSRMatrix {
  public:
   using float_t = T;

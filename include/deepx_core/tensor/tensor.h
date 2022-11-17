@@ -45,7 +45,7 @@ class Tensor {
 
  private:
   Shape shape_;
-  std::vector<value_type> storage_;
+  std::vector<value_type> storage_; // 用 std::vector 存储数据
   pointer data_ = nullptr;
 
   template <typename U>

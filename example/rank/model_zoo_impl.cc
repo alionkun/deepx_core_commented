@@ -48,7 +48,7 @@ bool ModelZooImpl::InitConfig(const StringMap& config) {
 }
 
 bool ModelZooImpl::InitConfigKV(const std::string& k, const std::string& v) {
-  if (k == "config" || k == "group_config") {
+  if (k == "config" || k == "group_config") { // 读取特征配置
     if (!GuessGroupConfig(v, &items_, nullptr, k.c_str())) {
       return false;
     }

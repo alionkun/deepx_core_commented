@@ -30,7 +30,7 @@ class GraphTarget {
  private:
   const GraphNode* node_ = nullptr;
   std::string name_;
-  std::vector<GraphNode*> forward_;
+  std::vector<GraphNode*> forward_; // target的所有上游节点
   std::vector<std::string> forward_name_;
   friend class Graph;
 

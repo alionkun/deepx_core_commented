@@ -213,7 +213,7 @@ std::vector<GroupConfigItem> GetLRGroupConfig(
   return lr_items;
 }
 
-bool IsFMGroupConfig(const std::vector<GroupConfigItem>& items) {
+bool IsFMGroupConfig(const std::vector<GroupConfigItem>& items) { // 如果所有特征的 emb size 都一样，则认为是 FM Family ?
   if (items.empty()) {
     return false;
   }

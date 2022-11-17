@@ -652,7 +652,7 @@ void LLSparseTensor<T, I>::add(const srm_t& X, int beta, tsr_t* Y) noexcept {
 
 template <typename T, typename I>
 void LLSparseTensor<T, I>::gesmm_mod(const csr_t& X, const tsr_t& Y, int beta,
-                                     tsr_t* Z) noexcept {
+                                     tsr_t* Z) noexcept { // gesmm = general sparse matric multiply ?
   DXASSERT_RANK2(Y);
   int k = Y.dim(0);
   int n = Y.dim(1);
@@ -664,21 +664,21 @@ void LLSparseTensor<T, I>::gesmm_mod(const csr_t& X, const tsr_t& Y, int beta,
     Z->zeros();
   }
 
-  if (n == 1) {
+  if (n == 1) { // y.shape=(k, 1)， x.dense_shape=(batch, k)， z.shape=(batch, 1)， 所以等价于 tf.sparse.sparse_dense_matmul()
     float_t Yj;
-    CSR_FOR_EACH_ROW(X, i) {
-      CSR_FOR_EACH_COL(X, i) {
-        Yj = _Y[CSR_COL(X) % k];
-        *_Z += CSR_VALUE(X) * Yj;
+    CSR_FOR_EACH_ROW(X, i) { // 逐行
+      CSR_FOR_EACH_COL(X, i) { // 遍历第i行有值的列
+        Yj = _Y[CSR_COL(X) % k]; // CSR_COL(x) 表示第 i 行第 __k 个有值特征的列坐标，所以 Yj 表示特征对应的权重；所以这里 %k 意味着特征可能比权重多，这个时候通过 mod 压缩，这里会引入冲突
+        *_Z += CSR_VALUE(X) * Yj; // CSR_VALUE(x) 表示第 i 行第 __k 个有值特征的值，所以这里相当于 dot 操作中的一个乘法项，累加到 Z 中
       }
       _Z += 1;
     }
-  } else {
+  } else { // 等价与 tf.nn.embedding_lookup_sparse()
     cptr_t Yj;
     CSR_FOR_EACH_ROW(X, i) {
       CSR_FOR_EACH_COL(X, i) {
-        Yj = _Y + (CSR_COL(X) % k) * n;
-        ll_math_t::axpy(n, CSR_VALUE(X), Yj, _Z);
+        Yj = _Y + (CSR_COL(X) % k) * n; // Yj 表示 X （也就是样本矩阵）中第 i 行第 __k 个有值特征对应的权重向量的起点，这个向量的长度为 n
+        ll_math_t::axpy(n, CSR_VALUE(X), Yj, _Z); // 所以这一行等价于把对应的特征 emb / 权重向量（长度为 n），取出来乘以特征的值，累加到 Z 中
       }
       _Z += n;
     }

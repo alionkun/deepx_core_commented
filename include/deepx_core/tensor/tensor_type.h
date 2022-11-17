@@ -30,11 +30,11 @@ enum TENSOR_DTYPE {
 /************************************************************************/
 enum TENSOR_TYPE {
   TENSOR_TYPE_NONE = 0,
-  TENSOR_TYPE_TSR = 1,
-  TENSOR_TYPE_SRM = 2,
-  TENSOR_TYPE_CSR = 3,
-  TENSOR_TYPE_TSRI = 4,
-  TENSOR_TYPE_TSRS = 5,
+  TENSOR_TYPE_TSR = 1, // 浮点型稠密张量
+  TENSOR_TYPE_SRM = 2, // 稀疏行矩阵
+  TENSOR_TYPE_CSR = 3, // 压缩稀疏行矩阵
+  TENSOR_TYPE_TSRI = 4, // 整型稠密张量
+  TENSOR_TYPE_TSRS = 5, // 字符串型稠密张量
   TENSOR_TYPE_SRP = 10,  // backward compatibility
   TENSOR_TYPE_SVP = 11,  // backward compatibility
   TENSOR_TYPE_SRG = 12,  // backward compatibility

@@ -81,11 +81,11 @@ class EmbeddingLookupOp : public OpImpl {
 
   void InitForward() override {
     Xnode_ = node_->input(0);
-    DXCHECK_THROW(!Xnode_->need_grad());
+    DXCHECK_THROW(!Xnode_->need_grad()); // embedding lookup 中， x 一般是输入层，本身和上游都不是网络参数
     Wnode_ = node_->input(1);
     W_node_type_ = Wnode_->node_type();
     W_tensor_type_ = Wnode_->tensor_type();
-    X_ = GetPtrCSR(Xnode_);
+    X_ = GetPtrCSR(Xnode_); // X 只能是样本
     Wtsr_ = nullptr;
     Wsrm_ = nullptr;
     switch (W_tensor_type_) {

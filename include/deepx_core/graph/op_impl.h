@@ -24,6 +24,7 @@ namespace deepx_core {
 #define DEFINE_OP_LIKE(clazz_name) \
   const char* class_name() const noexcept override { return #clazz_name; }
 
+// OP和节点同名，例如 AbcNode 和 AbcOp，同时注册；这里 op 类的名称被指定为 AbcNode 这是为了方便和节点关联吗？
 #define GRAPH_NODE_OP_REGISTER(name) \
   GRAPH_NODE_REGISTER(name##Node);   \
   OP_REGISTER(name##Op, #name "Node")
@@ -33,13 +34,13 @@ namespace deepx_core {
 /************************************************************************/
 class OpImpl : public Op {
  protected:
-  const Graph* graph_ = nullptr;
-  const GraphNode* node_ = nullptr;
-  TensorMap* param_ = nullptr;
-  Hidden* hidden_ = nullptr;
-  TensorMap* ptr_ = nullptr;
-  TensorMap* grad_ = nullptr;
-  TensorMap* grad_ptr_ = nullptr;
+  const Graph* graph_ = nullptr;    // 对应的计算图
+  const GraphNode* node_ = nullptr; // 对应的节点
+  TensorMap* param_ = nullptr;      // 模型参数(字符串 -> 张量)的指针, 它的所有权不属于OpContext
+  Hidden* hidden_ = nullptr;        // 隐层(字符串 -> 张量) hidden_.inst_, 样本(字符串 -> 张量)
+  TensorMap* ptr_ = nullptr;        // 模型参数+隐层+样本(字符串 -> 张量的指针)
+  TensorMap* grad_ = nullptr;       // 梯度(字符串 -> 张量)
+  TensorMap* grad_ptr_ = nullptr;   // 梯度(字符串 -> 张量的指针)
   TensorMap* overwritten_param_ = nullptr;
   TensorMap* overwritten_ptr_ = nullptr;
 
@@ -70,7 +71,7 @@ class OpImpl : public Op {
  protected:
   tsr_t* InitHiddenTSR(const GraphNode* node, const Shape& shape) {
     auto& Z = hidden_->get_or_insert<tsr_t>(node->name());
-    Z.resize(shape);
+    Z.resize(shape); // 这里相当于重新分配了存储空间
     tsr_t* tsr = &Z;
     (*ptr_)[node->name()] = tsr;
     return tsr;
@@ -277,7 +278,7 @@ class OpBinaryBase : public OpImpl {
   void InitForward() override {
     Xnode_ = node_->input(0);
     Ynode_ = node_->input(1);
-    X_ = GetPtrTSR(Xnode_);
+    X_ = GetPtrTSR(Xnode_); // X_ 这些表示 Xnode_ 对应的具体的 tensor
     Y_ = GetPtrTSR(Ynode_);
     Z_ = InitHiddenTSR(node_, InferShape());
   }

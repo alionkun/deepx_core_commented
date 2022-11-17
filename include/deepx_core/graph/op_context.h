@@ -21,11 +21,11 @@ namespace deepx_core {
 class OpContext : public DataType {
  private:
   const Graph* graph_ = nullptr;
-  TensorMap* param_ = nullptr;
+  TensorMap* param_ = nullptr; // 网络参数？
   int forward_chain_size_ = 0;
   int backward_chain_size_ = 0;
-  std::vector<std::unique_ptr<Op>> forward_chain_;
-  std::vector<Op*> backward_chain_;
+  std::vector<std::unique_ptr<Op>> forward_chain_; // 前向计算涉及的 op 列表
+  std::vector<Op*> backward_chain_; // 反向计算涉及的 op 列表
   int has_loss_ = 0;
   std::string loss_name_;
   Hidden hidden_;

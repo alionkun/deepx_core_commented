@@ -36,7 +36,7 @@ class LRModel : public ModelZooImpl {
     auto* Wlin = GetVariableZeros("Wlin", Shape(dim_, 1));
     auto* lin = EmbeddingLookup("", X, Wlin);
     auto* Z1 = AddBias("Z1", lin);
-    auto Z2 = BinaryClassificationTarget(Z1, has_w_);
+    auto Z2 = BinaryClassificationTarget(Z1, has_w_); // (loss, pred)
     ReleaseVariable();
     return graph->Compile(Z2, 1);
   }

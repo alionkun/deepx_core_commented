@@ -31,11 +31,11 @@ class Main : public DataType {
     // Initialize op context.
     OpContext op_context;
     op_context.Init(&graph, &param);
-    DXCHECK_THROW(op_context.InitOp(std::vector<int>{0}, -1));
-    auto& _X = op_context.mutable_inst()->insert<tsr_t>(X.name());
+    DXCHECK_THROW(op_context.InitOp(std::vector<int>{0}, -1)); // -1 表示没有loss
+    auto& _X = op_context.mutable_inst()->insert<tsr_t>(X.name()); // 样本存储在 context 中，以 map 的形式
     auto& _W = op_context.mutable_inst()->insert<tsr_t>(W.name());
     auto& _B = op_context.mutable_inst()->insert<tsr_t>(B.name());
-    _X.resize(X.shape());
+    _X.resize(X.shape()); // 把存储空间都分配好，这里包括了 batch dim，是不是意味着不支持动态 batch ?
     _W.resize(W.shape());
     _B.resize(B.shape());
     op_context.InitForward();
@@ -43,7 +43,7 @@ class Main : public DataType {
     // Input, forward, output.
     auto compute = [&op_context, &_X, &_W, &_B, &Z](float_t x, float_t w,
                                                     float_t b) {
-      _X.data(0) = x;
+      _X.data(0) = x; // 计算图执行引擎，将该特征对应的内存和图节点的名称做了对应，可以据此找到数据，用户需要做的只是把特征拷贝到对应对应的内存中。说实话，这个封装和实现方法比较混乱
       _W.data(0) = w;
       _B.data(0) = b;
       op_context.Forward();

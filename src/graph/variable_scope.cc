@@ -23,7 +23,7 @@ std::string VariableScopeManager::GetVariableName(
 }
 
 VariableNode* VariableScopeManager::_GetVariable(
-    variable_node_ptr_t& node, variable_node_ptr_t& new_node) {
+    variable_node_ptr_t& node, variable_node_ptr_t& new_node) { // MakeSureThey
   if (node) {
     DXCHECK_THROW(node->name() == new_node->name());
     DXCHECK_THROW(node->node_type() == new_node->node_type());
@@ -62,10 +62,10 @@ void VariableScopeManager::ReleaseVariable() {
 VariableNode* VariableScopeManager::GetVariable(const std::string& name,
                                                 const Shape& shape,
                                                 int tensor_type) {
-  std::string variable_name = GetVariableName(name);
+  std::string variable_name = GetVariableName(name); // 添加 scope
   variable_node_ptr_t new_node(
       new VariableNode(variable_name, shape, tensor_type));
-  variable_node_ptr_t& node = variable_map_[variable_name];
+  variable_node_ptr_t& node = variable_map_[variable_name]; // 这里可能返回空/非空，下面的 _GetVariable() 在空的场景下为其赋值，在非空的场景下检查二者是否一致，这里为啥不先 variable_map_.find()？ 而是要创建一个新的 VariableNode 对象，他们的属性是一样的
   return _GetVariable(node, new_node);
 }
 

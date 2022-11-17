@@ -7,3 +7,5 @@ Release
 *.suo
 *.user
 .vs
+tags
+.VSCode*

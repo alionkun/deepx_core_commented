@@ -73,7 +73,7 @@ class Hidden : public TensorMap {
  private:
   std::default_random_engine engine_;
   float_t* loss_ = nullptr;
-  Instance inst_;
+  Instance inst_; // 样本 map(node_name, Tensor)
 
  public:
   template <typename Int>

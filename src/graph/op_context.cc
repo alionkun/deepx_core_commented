@@ -70,7 +70,7 @@ void OpContext::Init(const Graph* graph, TensorMap* param) noexcept {
   param_ = param;
 }
 
-bool OpContext::InitOp(const std::vector<int>& target_indices, int loss_index) {
+bool OpContext::InitOp(const std::vector<int>& target_indices, int loss_index) { // target_indices 存储了要计算 graph->target 的下标，可以多个，但最多只能有一个是 loss
   std::vector<GraphTarget> targets;
   targets.reserve(target_indices.size());
   for (size_t i = 0; i < target_indices.size(); ++i) {  // NOLINT
@@ -119,7 +119,7 @@ bool OpContext::InitOp(const std::vector<GraphTarget>& targets,
   }
 
   std::unordered_set<std::string> dedup;
-  for (size_t i = 0; i < targets.size(); ++i) {
+  for (size_t i = 0; i < targets.size(); ++i) { // 根据 targets 计算出 forward_chain_ 和 backward_chain_
     int is_loss_index = ((int)i == loss_index);
     const GraphTarget& target = targets[i];
     for (int j = 0; j < target.forward_size(); ++j) {  // NOLINT
@@ -243,7 +243,7 @@ void OpContext::InitBackward() {
   }
 }
 
-void OpContext::Forward() {
+void OpContext::Forward() { // 计算图执行入口
   if (!enable_profile_) {
     for (int i = 0; i < forward_chain_size_; ++i) {
       forward_chain_[i]->Forward();

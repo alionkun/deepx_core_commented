@@ -49,7 +49,7 @@ class Main : public DataType {
       auto& _X = op_context.mutable_inst()->insert<tsr_t>(X.name());
       _X.resize(2 + i, 10);
       _X.randn(engine);
-      op_context.InitForward();
+      op_context.InitForward(); // 所以不支持动态 shape ，即使是 batch dimension
       op_context.Forward();
       const auto& _XW = op_context.hidden().get<tsr_t>(XW.name());
       const auto& _Z = op_context.hidden().get<tsr_t>(Z.name());

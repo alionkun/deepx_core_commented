@@ -69,7 +69,7 @@ const GraphNode* Graph::find_node(uint16_t node_id) const noexcept {
 }
 
 void Graph::CheckName(GraphNode* node,
-                      std::unordered_set<std::string>* dedup_name) {
+                      std::unordered_set<std::string>* dedup_name) { // check and repair node_name
   std::string name;
   if (node->IsValidName()) {
     name = node->name();
@@ -88,7 +88,7 @@ void Graph::CheckName(GraphNode* node,
   dedup_name->emplace(std::move(name));
 }
 
-void Graph::CompileTarget(GraphNode* node,
+void Graph::CompileTarget(GraphNode* node, // node 是 target 对应的节点，或者节点直接/间接依赖的节点
                           std::unordered_set<GraphNode*>* dedup_node,
                           std::unordered_set<std::string>* dedup_name,
                           GraphTarget* target) {
@@ -100,7 +100,7 @@ void Graph::CompileTarget(GraphNode* node,
 
   for (GraphNode* input : node->input()) {
     CompileTarget(input, dedup_node, dedup_name, target);
-    if (input->need_grad()) {
+    if (input->need_grad()) { // need_grad 需要传递给父节点
       node->set_need_grad(1);
     }
   }
@@ -110,8 +110,8 @@ void Graph::CompileTarget(GraphNode* node,
   target->forward_name_.emplace_back(node->name());
 }
 
-void Graph::CompileTarget(GraphNode* node,
-                          std::unordered_set<std::string>* dedup_name,
+void Graph::CompileTarget(GraphNode* node, // target node
+                          std::unordered_set<std::string>* dedup_name, // 用于去重节点名称
                           GraphTarget* target) {
   std::unordered_set<GraphNode*> dedup_node;
   CheckName(node, dedup_name);
@@ -187,18 +187,18 @@ bool Graph::Compile(const std::vector<GraphNode*>& target_nodes, int on_heap) {
   // fill 'target_', 'name_2_target_'
   std::unordered_set<GraphNode*> dedup_node;
   std::unordered_set<std::string> dedup_name;
-  size_t target_size = target_nodes.size();
+  size_t target_size = target_nodes.size(); // target_nodes 可能包含 loss 和 pred
   target_.resize(target_size);
   name_2_target_.reserve(target_size);
   for (size_t i = 0; i < target_size; ++i) {
     GraphTarget& target = target_[i];
-    CompileTarget(target_nodes[i], &dedup_name, &target);
+    CompileTarget(target_nodes[i], &dedup_name, &target); // 使用 node 初始化 target； target包含了计算这个target所需的信息，例如所有上游
     name_2_target_.emplace(target.name(), &target);
-    dedup_node.insert(target.forward().begin(), target.forward().end());
+    dedup_node.insert(target.forward().begin(), target.forward().end()); // target.forward() 存储了 target 依赖的所有上游节点
   }
 
   // sort by name to get determinant iteration order
-  std::vector<GraphNode*> sorted(dedup_node.begin(), dedup_node.end());
+  std::vector<GraphNode*> sorted(dedup_node.begin(), dedup_node.end()); // 至此，dedup_node 包含了所有 target_nodes 所依赖的所有 node
   std::sort(sorted.begin(), sorted.end(),
             [](const GraphNode* a, const GraphNode* b) {
               return a->name() > b->name();
@@ -208,7 +208,7 @@ bool Graph::Compile(const std::vector<GraphNode*>& target_nodes, int on_heap) {
   name_2_node_.reserve(sorted.size());
   for (GraphNode* node : sorted) {
     if (name_2_node_.count(node->name()) > 0) {
-      DXERROR("Duplicate node name: %s.", node->name().c_str());
+      DXERROR("Duplicate node name: %s.", node->name().c_str()); // how can ? dedup_node 每次 insert 一个 target 的 forwards，这个已经去重了，意味着图中有两个不同的节点使用了相同的名字。 dedup_name 不是已经逐级下传了吗？ 实际上在 CompileTarget() 中，dedup_name 只在节点的名称不存在或者非法的时候，给节点自动命名，只能保证自动命名在当时不会引入冲突，实际上有 2 种场景会进入这个分支：1）两个有效命名重复；2）系统先解析了一个无效命名的节点，然后给其命名 class_nameX ，而后解析到一个用户自己命名的同名节点。所以这个自动命名的方法是有问题的。
       return false;
     }
     name_2_node_.emplace(node->name(), node);

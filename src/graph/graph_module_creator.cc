@@ -433,7 +433,7 @@ std::vector<GraphNode*> BinaryClassificationTarget(const std::string& prefix,
   }
 }
 
-std::vector<GraphNode*> BinaryClassificationTarget(GraphNode* X, int has_w) {
+std::vector<GraphNode*> BinaryClassificationTarget(GraphNode* X, int has_w) { // X 实际上是 logits
   DXCHECK_THROW(X->shape().is_rank(2));
   DXCHECK_THROW(X->shape()[1] == 1);
   auto* Y = GetY(1);
@@ -441,12 +441,12 @@ std::vector<GraphNode*> BinaryClassificationTarget(GraphNode* X, int has_w) {
   auto* P = Sigmoid("", X);
   if (has_w) {
     auto* W = GetW(1);
-    auto* WL = Mul("", L, W);
+    auto* WL = Mul("", L, W); // WL is short for Weighted Loss ? 所以 w 是指样本权重
     auto* WM = ReduceMean("", WL);
     return {WM, P};
   } else {
     auto* M = ReduceMean("", L);
-    return {M, P};
+    return {M, P}; // return (loss, predict)
   }
 }
 

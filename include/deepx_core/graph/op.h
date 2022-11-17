@@ -24,7 +24,7 @@ class Op : public DataType {
                     Hidden* hidden, TensorMap* ptr, TensorMap* grad,
                     TensorMap* grad_ptr, TensorMap* overwritten_param,
                     TensorMap* overwritten_ptr) = 0;
-  virtual void InitForward() = 0;
+  virtual void InitForward() = 0; // 用于根据输入分配输出的空间
   virtual void InitPredict() = 0;
   virtual void InitBackward() = 0;
   virtual void Forward() = 0;

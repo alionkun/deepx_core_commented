@@ -241,7 +241,7 @@ class GraphNode {
   //
   // See 'TENSOR_INITIALIZER_TYPE'.
   int initializer_type_ = TENSOR_INITIALIZER_TYPE_NONE;
-  // the 1st additional param of the initializer
+  // the 1st additional param of the initializer 这些只能是 VariableNode 专有吧
   double initializer_param1_ = 0;
   // the 2nd additional param of the initializer
   double initializer_param2_ = 0;
@@ -301,7 +301,7 @@ class GraphNode {
   GraphNode() = default;
   explicit GraphNode(std::string name) noexcept;
   virtual ~GraphNode() = default;
-  virtual const char* class_name() const noexcept = 0;
+  virtual const char* class_name() const noexcept = 0; // ！！！ 这是序列化、可移植性的基础，即通过 string 寻址 op 代码
   virtual std::type_index type_index() const noexcept = 0;
   virtual bool IsAttrEqual(const GraphNode* other) const noexcept;
   virtual void Write(OutputStream& os);  // NOLINT
@@ -317,25 +317,25 @@ class GraphNode {
 /************************************************************************/
 /* base node */
 /************************************************************************/
-class GraphNodeUnaryBase : public GraphNode {
+class GraphNodeUnaryBase : public GraphNode { // 只有一个输入的节点
  public:
   GraphNodeUnaryBase(std::string name, GraphNode* X);
   DEFINE_GRAPH_NODE_LIKE_BASE(GraphNodeUnaryBase);
 };
 
-class GraphNodeUnaryElementWiseBase : public GraphNodeUnaryBase {
+class GraphNodeUnaryElementWiseBase : public GraphNodeUnaryBase { // 只有一个输入的执行 element-wise 操作的节点
  public:
   GraphNodeUnaryElementWiseBase(std::string name, GraphNode* X);
   DEFINE_GRAPH_NODE_LIKE_BASE(GraphNodeUnaryElementWiseBase);
 };
 
-class GraphNodeBinaryBase : public GraphNode {
+class GraphNodeBinaryBase : public GraphNode { // 两个输入的节点
  public:
   GraphNodeBinaryBase(std::string name, GraphNode* X, GraphNode* Y);
   DEFINE_GRAPH_NODE_LIKE_BASE(GraphNodeBinaryBase);
 };
 
-class GraphNodeBinaryElementWiseBase : public GraphNodeBinaryBase {
+class GraphNodeBinaryElementWiseBase : public GraphNodeBinaryBase { // 两个输入的element-wise的节点，意味着两个输入的shape必须相等
  public:
   GraphNodeBinaryElementWiseBase(std::string name, GraphNode* X, GraphNode* Y);
   DEFINE_GRAPH_NODE_LIKE_BASE(GraphNodeBinaryElementWiseBase);
@@ -353,7 +353,7 @@ class GraphNodeForAxisBase : public GraphNodeUnaryBase {
   int axis_ = 0;
   DEFINE_GRAPH_NODE_ATTR(GraphNodeForAxisBase, reduce_all_, axis_);
 
- public:
+ public:    
   int axis() const noexcept { return axis_; }
 
  public:

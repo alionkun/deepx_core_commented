@@ -30,11 +30,11 @@ namespace deepx_core {
 class ModelZooImpl : public ModelZoo {
  protected:
   std::vector<GroupConfigItem> items_;
-  int item_is_fm_ = 0;
+  int item_is_fm_ = 0; // 是否 FM Family
   int item_m_ = 0;
-  int item_k_ = 0;
-  int item_mk_ = 0;
-  int has_w_ = 0;
+  int item_k_ = 0; // FM Family 'k'
+  int item_mk_ = 0; // 所有特征的 emb size 之和
+  int has_w_ = 0; // 样本是否有权重
   int sparse_ = 0;
 
  public:
